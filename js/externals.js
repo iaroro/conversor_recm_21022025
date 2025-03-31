@@ -9,7 +9,7 @@ const requestNotificationPermission = async ()=>{
 }
 
 async function recordVideo(){
-    if (window.recorder && window.state==="recording"){
+    if (window.recorder && window.recorder.state==="recording"){
         window.recorder.stop();
     }else{
         let toggle = document.getElementById("recording-button");
@@ -24,14 +24,14 @@ async function recordVideo(){
         window.recorder = new MediaRecorder(stream);
         let chunks = [];
         window.recorder.ondataavailable = function(event){
-            if(event.data.size <= 0){
+            if(event.data.size > 0){
                 chunks.push(event.data);
             }
         };
 
         window.recorder.onstop = function(){
-            let blob = new Blob(chunks,{type:'video/mp4'});
-            toggle.innerHTML=`<i class="fa fa-circle"></i>`;
+            let blob = new Blob(chunks,{type:'video/webm'});
+            toggle.innerHTML = '<i class="fa fa-circle"></i>';
             videoE1.srcObject= null;
             videoE1.src = URL.createObjectURL(blob);
             let tracks = stream.getTracks();
@@ -39,7 +39,7 @@ async function recordVideo(){
         }
 
 window.recorder.onstart = function(){
-    toggle.innerHTML=`<i class="fa fa-square"></i>`;
+    toggle.innerHTML = '<i class="fa fa-circle"></i>';
 };
 
 window.recorder.start();
