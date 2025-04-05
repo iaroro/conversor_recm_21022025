@@ -62,7 +62,7 @@ function geolocalizacion(){
 
 function _onGetCurrentLocation(){
     const options ={
-        enableHighAccuaracy: true,
+        enableHighAccuracy: true,
         timeout: 5000,
         maximumAge: 0
     };
@@ -72,7 +72,7 @@ function _onGetCurrentLocation(){
             lng: position.coords.longitude
         };
         let enlace = document.getElementById("ir_mapa");
-        enlace.href = `https://maps.google.com/?q=${marker.lat},${marker.lng}`;
+        enlace.href = `https://maps.google.com/?q=${maker.lat},${maker.lng}`;
         enlace.text = "Ir al mapa";
         enlace.target = "_blank";
     },function(error){
@@ -81,109 +81,114 @@ function _onGetCurrentLocation(){
 }
 const init = () => {
     const tieneSoporteUserMedia = () =>
-        !!(navigator.mediaDevices.getUserMedia);
-    if(typeof MediaRecorder === "undefined" || !tieneSoporteUserMedia()){
-        return alert ("su navegador no cumple con los requsitos , favor actualizar a una version mas reciente ");
-    }
-    const $listaDeDispositivos = document.querySelector("#listaDeDispositivos"),
-    $duracion = document.querySelector("duracion"),
-    $btnComenzarGrabacion = document.querySelector("#btnComenzarGrabacion"),
-    $btnDEtenerGrabacion = document.querySelector("#btnDetenerGrabacion");
+        !!(navigator.mediaDevices?.getUserMedia);
 
-    const LimpiarSelect = () => {
+    if (typeof MediaRecorder === "undefined" || !tieneSoporteUserMedia()) {
+        return alert("Su navegador no cumple con los requisitos, favor actualizar a una versión más reciente.");
+    }
+
+    const $listaDeDispositivos = document.querySelector("#listaDeDispositivos"),
+          $duracion = document.querySelector("#duracion"),
+          $btnComenzarGrabacion = document.querySelector("#btnComenzarGrabacion"),
+          $btnDetenerGrabacion = document.querySelector("#btnDetenerGrabacion");
+
+    const limpiarSelect = () => {
         for (let x = $listaDeDispositivos.options.length - 1; x >= 0; x--) {
             $listaDeDispositivos.options.remove(x);
-          }
-          
-          const segundosATiempo = numeroDeSegundos => {
-            let horas = Math.floor(numeroDeSegundos / 60 / 60);
-            numeroDeSegundos -= horas * 60 * 60;
-          
-            let minutos = Math.floor(numeroDeSegundos / 60);
-            numeroDeSegundos -= minutos * 60;
-          
-            numeroDeSegundos = parseInt(numeroDeSegundos);
-          
-            if (horas < 10) { 
-              horas = "0" + horas; 
-            }
-            if (minutos < 10) {
-              minutos = "0" + minutos; 
-            }
-            if (numeroDeSegundos < 10) {
-              numeroDeSegundos = "0" + numeroDeSegundos; 
-            }
-          
-            return `${horas}:${minutos}:${numeroDeSegundos}`;
-          };
-          let tiempodeInicio,mediaRecorder,idInterval;
-          const refrescar = () =>{
-            $duracion.textContent = segundosATiempo ( (Date.now - tiempodeInicio) / 1000);
-          }
-
-          const llenarLista = () => {
-            navigator.mediaDevices.enumerateDevices().then(dispositivos => {
-                limpiarSelect();
-                dispositivos.forEach((dispositivo, indice) => {
-                    if (dispositivo.kind === "audioinput") {
-                        const $opcion = document.createElement("option");
-                        $opcion.text = dispositivo.label || `Dispositivo ${indice + 1}`;
-                        $opcion.value = dispositivo.deviceId;
-                        $listaDeDispositivos.appendChild($opcion);
-                    }
-                })
-            })
-        };
-
-        const comenzarACortar =() =>{
-            tiempoInicio = Date.now();
-            idIntervalo = setInterval (refrescar,500);
-        };
-        const comenzarAGrabar  =() =>{
-            if(!$listaDeDispositivos.options.length) return alert ("no hay dispositivos");
-            if(mediaRecorder) return alert ("ya se esta garbando");
-            navigator.mediaDevices.getUserMedia({
-                audio:{
-                    deviceId:$listaDeDispositivos.value,
-                }
-            }).then (stream =>{
-                mediaRecorder new MediaRecorder(stream);
-                mediaRecorder.start();
-                comenzarAContar();
-                const fragmentosDeAudio = [];
-                mediaRecorder.addEventListener("stop", ()=>{
-                    stream.getTracks().forEach(track=>track.stop());
-                    detenerConteo();
-                    const blobAudio = new Blob (fragmentosDeAudio);
-                    const urlParaDescargar = URL.createObjectURL(blobAudio);
-                    document.body.appendChild(a);
-                    a.style ="display:none";
-                    a.href = urlParaDescargar;
-                    a.download ="rodrigo.ernestocamposmejia.ufg.webn";
-                    a.click();
-                    window.URL.revokeObjectURL(urlParaDescargar);
-                });
-            }).catch (error =>{
-                console.log(error);
-            });
-        };
-        const detenerConteo = () => {
-            clearInterval(idIntervalo);
-            tiempoInicio = null;
-            $duracion.textContent = "";
-          };
-          
-          const detenerGrabacion = () => {
-            if (!mediaRecorder) return alert("No se está grabando");
-            mediaRecorder.stop();
-            mediaRecorder = null;
-          }
-          $btnComenzarGrabacion.addEventListener("click",comenzarAGrabar);
-          $btnDetenerGrabacion.addEventListener("click",detenerGrabacion);
-
-          llenarLista();
-
         }
+    };
 
-        document.addEventListener("DOMContentLoaded", init);
-    }
+    const segundosATiempo = numeroDeSegundos => {
+        let horas = Math.floor(numeroDeSegundos / 3600);
+        numeroDeSegundos -= horas * 3600;
+
+        let minutos = Math.floor(numeroDeSegundos / 60);
+        numeroDeSegundos -= minutos * 60;
+
+        numeroDeSegundos = parseInt(numeroDeSegundos);
+
+        return `${horas.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}:${numeroDeSegundos.toString().padStart(2, '0')}`;
+    };
+
+    let tiempoInicio, mediaRecorder, idIntervalo;
+
+    const refrescar = () => {
+        if (tiempoInicio) {
+            $duracion.textContent = segundosATiempo((Date.now() - tiempoInicio) / 1000);
+        }
+    };
+
+    const llenarLista = () => {
+        navigator.mediaDevices.enumerateDevices().then(dispositivos => {
+            limpiarSelect();
+            dispositivos.forEach((dispositivo, indice) => {
+                if (dispositivo.kind === "audioinput") {
+                    const $opcion = document.createElement("option");
+                    $opcion.text = dispositivo.label || `Dispositivo ${indice + 1}`;
+                    $opcion.value = dispositivo.deviceId;
+                    $listaDeDispositivos.appendChild($opcion);
+                }
+            });
+        });
+    };
+
+    const comenzarAContar = () => {
+        tiempoInicio = Date.now();
+        idIntervalo = setInterval(refrescar, 500);
+    };
+
+    const detenerConteo = () => {
+        clearInterval(idIntervalo);
+        tiempoInicio = null;
+        $duracion.textContent = "";
+    };
+
+    const comenzarAGrabar = () => {
+        if (!$listaDeDispositivos.options.length) return alert("No hay dispositivos disponibles.");
+        if (mediaRecorder) return alert("Ya se está grabando.");
+
+        navigator.mediaDevices.getUserMedia({
+            audio: { deviceId: $listaDeDispositivos.value }
+        }).then(stream => {
+            mediaRecorder = new MediaRecorder(stream);
+            const fragmentosDeAudio = [];
+
+            mediaRecorder.addEventListener("dataavailable", event => {
+                fragmentosDeAudio.push(event.data);
+            });
+
+            mediaRecorder.addEventListener("stop", () => {
+                stream.getTracks().forEach(track => track.stop());
+                detenerConteo();
+
+                const blobAudio = new Blob(fragmentosDeAudio);
+                const urlParaDescargar = URL.createObjectURL(blobAudio);
+                const a = document.createElement("a");
+                document.body.appendChild(a);
+                a.style = "display:none";
+                a.href = urlParaDescargar;
+                a.download = "grabacion.webm";
+                a.click();
+                window.URL.revokeObjectURL(urlParaDescargar);
+            });
+
+            mediaRecorder.start();
+            comenzarAContar();
+        }).catch(error => {
+            console.error("Error al iniciar la grabación:", error);
+        });
+    };
+
+    const detenerGrabacion = () => {
+        if (!mediaRecorder) return alert("No se está grabando.");
+        mediaRecorder.stop();
+        mediaRecorder = null;
+    };
+
+    $btnComenzarGrabacion.addEventListener("click", comenzarAGrabar);
+    $btnDetenerGrabacion.addEventListener("click", detenerGrabacion);
+
+    llenarLista();
+};
+
+document.addEventListener("DOMContentLoaded", init);
